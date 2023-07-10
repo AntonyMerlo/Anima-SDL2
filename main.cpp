@@ -217,6 +217,32 @@ void desenhaObjeto(SDL_Renderer *renderer, float **matriz, tObjeto3d *objeto) {
     }
 }
 
+void rotacaoY(float **matriz, float angulo) {
+    float c = cos(angulo);
+    float s = sin(angulo);
+
+    float **novaMatriz;
+    novaMatriz = (float **) malloc(4 * sizeof(float *));
+    for (int i = 0; i < 4; i++) {
+        novaMatriz[i] = (float *) malloc(4 * sizeof(float));
+    }
+
+    criaIdentidade4d(novaMatriz);
+
+    novaMatriz[0][0] = c;
+    novaMatriz[0][2] = -s;
+    novaMatriz[2][0] = s;
+    novaMatriz[2][2] = c;
+
+    MultMatriz4d(novaMatriz, matriz);
+
+    for (int i = 0; i < 4; i++) {
+        free(novaMatriz[i]);
+    }
+    free(novaMatriz);
+    SDL_Delay(100);
+}
+
 int main(int argc, char *argv[]) {
     SDL_Window *window;
     SDL_Event windowEvent;
@@ -250,6 +276,9 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < 4; i++) {
         matrizComposta[i] = new float[4];
     }
+
+    float angulo = 0.0;  // ângulo inicial
+    float velocidade = 0.01;  // velocidade de rotação
 
     while (!quit) {
         SDL_Delay(10);
@@ -287,6 +316,14 @@ int main(int argc, char *argv[]) {
 
         printf("Desenhando objeto...\n");
         desenhaObjeto(renderer, matrizComposta, objeto1);
+
+        // Aplica a rotação em torno do eixo Y
+        rotacaoY(objeto1->modelMatrix, angulo);
+
+        // Atualiza o ângulo para a próxima iteração
+        angulo += velocidade;
+
+        // render window
         SDL_RenderPresent(renderer);
     }
 
